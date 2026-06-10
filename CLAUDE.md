@@ -76,11 +76,6 @@ app/
 │   │   ├── ChatContextPanel.tsx  # Right-hand panel with two views of the user's Zep memory:
 │   │   ├── ChatMessages.tsx
 │   │   └── ChatSessionSidebar.tsx
-│   ├── home/
-│   │   ├── AiInstructionsCard.tsx
-│   │   ├── TddFrameworkCard.tsx
-│   │   └── WelcomeCard.tsx
-│   ├── ExampleComponent.tsx
 │   ├── Navigation.tsx
 │   ├── OAuthButtons.tsx  # Social sign-in buttons. OAuth must be initiated from the browser because it
 │   ├── PageHero.tsx  # The shared page header used at the top of every top-level page (Design, Charts,
@@ -150,7 +145,6 @@ types/
 | `app/auth/confirm/route.ts` | Email confirmation / magic-link handler. Supabase emails a link containing a | `GET` |
 | `app/auth/signout/route.ts` | Signs the user out and sends them to /login. Called by the Sign Out form in | `POST` |
 | `app/chat/page.tsx` |  | `ChatPage` |
-| `app/components/ExampleComponent.tsx` |  | `ExampleComponent` |
 | `app/components/Navigation.tsx` |  | `Navigation` |
 | `app/components/OAuthButtons.tsx` | Social sign-in buttons. OAuth must be initiated from the browser because it | `OAuthButtons` |
 | `app/components/PageHero.tsx` | The shared page header used at the top of every top-level page (Design, Charts, | `PageHero` |
@@ -159,9 +153,6 @@ types/
 | `app/components/chat/ChatContextPanel.tsx` | Right-hand panel with two views of the user's Zep memory: | `ChatContextPanel` |
 | `app/components/chat/ChatMessages.tsx` |  | `ChatMessages` |
 | `app/components/chat/ChatSessionSidebar.tsx` |  | `ChatSessionSidebar` |
-| `app/components/home/AiInstructionsCard.tsx` |  | `AiInstructionsCard` |
-| `app/components/home/TddFrameworkCard.tsx` |  | `TddFrameworkCard` |
-| `app/components/home/WelcomeCard.tsx` |  | `WelcomeCard` |
 | `app/login/actions.ts` | Email/password sign-in. Called as a form action from /login. | `login`, `signup` |
 | `app/login/page.tsx` |  | `LoginPage`, `default` |
 | `app/signup/page.tsx` |  | `SignupPage`, `default` |
