@@ -50,7 +50,7 @@ describe('Navigation', () => {
         screen.queryByRole('button', { name: /sign out/i })
       ).not.toBeInTheDocument()
     );
-    expect(screen.getByRole('link', { name: /^tasks$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^chat$/i })).toBeInTheDocument();
   });
 
   it('updates the email when auth state changes', async () => {

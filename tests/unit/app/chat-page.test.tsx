@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
@@ -108,7 +108,7 @@ describe('ChatPage', () => {
     render(<ChatPage />);
 
     expect(
-      screen.getByRole('heading', { level: 1, name: /llm agent chat/i })
+      screen.getByRole('heading', { level: 1, name: /paleo\s*desk/i })
     ).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Type a message…')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument();
@@ -239,55 +239,6 @@ describe('ChatPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders the session sidebar with a New chat button', async () => {
-    render(<ChatPage />);
-    expect(
-      await screen.findByRole('button', { name: /new chat/i })
-    ).toBeInTheDocument();
-  });
-
-  it('clears the transcript when starting a new chat', async () => {
-    const user = userEvent.setup();
-    render(<ChatPage />);
-
-    await user.click(screen.getByRole('button', { name: /new chat/i }));
-
-    expect(mockSetMessages).toHaveBeenCalledWith([]);
-  });
-
-  it('loads a selected session and maps its history into UI messages', async () => {
-    mockHistoryOrder.mockResolvedValue({
-      data: [
-        {
-          id: 1,
-          session_id: 'sess-1',
-          message: { type: 'human', content: 'Hi' },
-        },
-        { id: 2, session_id: 'sess-1', message: { type: 'ai', content: 'Yo' } },
-      ],
-      error: null,
-    });
-    const user = userEvent.setup();
-    render(<ChatPage />);
-
-    await user.click(screen.getByRole('button', { name: /load session/i }));
-
-    await waitFor(() =>
-      expect(mockSetMessages).toHaveBeenCalledWith([
-        {
-          id: 'history-1',
-          role: 'user',
-          parts: [{ type: 'text', text: 'Hi' }],
-        },
-        {
-          id: 'history-2',
-          role: 'assistant',
-          parts: [{ type: 'text', text: 'Yo' }],
-        },
-      ])
-    );
-  });
-
   it('sends a message on submit', async () => {
     const user = userEvent.setup();
     render(<ChatPage />);
@@ -299,5 +250,18 @@ describe('ChatPage', () => {
     await user.click(screen.getByRole('button', { name: /send/i }));
 
     expect(mockSendMessage).toHaveBeenCalledWith({ text: 'Hello agent' });
+  });
+
+  it('prefills the input when a suggested question chip is clicked', async () => {
+    const user = userEvent.setup();
+    render(<ChatPage />);
+
+    await user.click(
+      screen.getByRole('button', { name: /spinosaurus discovery/i })
+    );
+
+    expect(screen.getByPlaceholderText('Type a message…')).toHaveValue(
+      'What did the new Spinosaurus discovery find?'
+    );
   });
 });

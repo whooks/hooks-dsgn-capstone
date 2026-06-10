@@ -6,10 +6,12 @@ import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/logger';
 import { getZepClient } from '@/lib/zep/client';
 import { retrieveUserContext, recordChatTurn } from '@/lib/zep/chat-memory';
-import { createCaptureStream } from '@/lib/zep/stream-capture';
 
-// Allow streaming responses up to 30 seconds.
-export const maxDuration = 30;
+// Allow responses up to 5 minutes (300s). The multi-agent RAG path runs ~20s+,
+// and the web-fallback path (Tavily + Firecrawl) can take longer. Note: on
+// serverless hosts this is a hint capped by your plan; local `next dev` doesn't
+// enforce it.
+export const maxDuration = 300;
 
 // Cap the Zep context lookup so a slow memory service never stalls the reply.
 const ZEP_CONTEXT_TIMEOUT_MS = 3000;
@@ -65,15 +67,16 @@ interface N8nProxyArgs {
 }
 
 /**
- * Proxy the request to the n8n workflow and stream its reply back.
+ * Proxy the request to the n8n workflow and return its reply.
  *
- * Resolves the signed-in user once: its id is forwarded to n8n (so the workflow
- * can stamp `n8n_chat_sessions` ownership on insert) and, when Zep is active, it
- * scopes the user-node summary lookup and the recorded turn. With Zep active the
- * user's long-term context is retrieved and included in the n8n body, and the
- * streamed reply is captured to log the turn to the user graph once it finishes
- * (the retrieved context is never re-ingested). `getSignedInUser` is try/caught
- * and returns null on failure, so none of this can break or stall the request.
+ * The agent's output guardrail validates the COMPLETE answer inside n8n, so we
+ * buffer the full reply here and then re-stream it word-by-word to the UI for a
+ * typing effect — we can't stream before the guardrail has seen the whole text
+ * (that's the deliberate trade-off for keeping the guardrail intact).
+ *
+ * Resolves the signed-in user once: its id is forwarded to n8n and, when Zep is
+ * active, scopes the context lookup and the recorded turn. `getSignedInUser` is
+ * try/caught and returns null on failure, so none of this can break the request.
  */
 async function proxyToN8n(args: N8nProxyArgs): Promise<Response> {
   const { webhookUrl, userText, sessionId, messages } = args;
@@ -120,29 +123,42 @@ async function proxyToN8n(args: N8nProxyArgs): Promise<Response> {
     return jsonError(`n8n webhook returned an error (${upstream.status})`, 502);
   }
 
-  // n8n's AI Agent streams newline-delimited JSON envelopes; extract just the
-  // reply text. Plain-text workflows pass through unchanged (see lib/n8n-stream).
-  const baseTextStream = upstream.body
+  // n8n's AI Agent returns newline-delimited JSON envelopes; createN8nTextStream
+  // extracts the clean reply text. We buffer the WHOLE reply (the output
+  // guardrail has already run in n8n) before sending anything to the browser.
+  const reader = upstream.body
     .pipeThrough(new TextDecoderStream())
-    .pipeThrough(createN8nTextStream());
+    .pipeThrough(createN8nTextStream())
+    .getReader();
+  let replyText = '';
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) replyText += value;
+    }
+  } finally {
+    reader.releaseLock();
+  }
 
-  // When Zep is active, tee the clean reply through a capture stream that logs
-  // the turn after it finishes streaming. The retrieved `context` is NOT passed
-  // here — only the raw user/assistant text — so it's never re-ingested.
-  const textStream = zep
-    ? baseTextStream.pipeThrough(
-        createCaptureStream(async (assistantText) => {
-          if (user && userText.trim() && assistantText.trim()) {
-            await recordChatTurn(zep, {
-              supabaseUser: user,
-              threadId: sessionId,
-              userText,
-              assistantText,
-            });
-          }
-        })
-      )
-    : baseTextStream;
+  // With Zep active, log the completed turn to the user's graph (the retrieved
+  // `context` is never re-ingested — only the raw user/assistant text).
+  if (zep && user && userText.trim() && replyText.trim()) {
+    await recordChatTurn(zep, {
+      supabaseUser: user,
+      threadId: sessionId,
+      userText,
+      assistantText: replyText,
+    });
+  }
+
+  // Re-stream the validated reply word-by-word so the chat types it out.
+  const chunks = replyText.match(/\S+\s*/g) ?? [replyText];
+  const textStream = simulateReadableStream({
+    chunks,
+    initialDelayInMs: 0,
+    chunkDelayInMs: 20,
+  });
 
   return createTextStreamResponse({ textStream });
 }

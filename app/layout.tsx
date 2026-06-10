@@ -32,8 +32,9 @@ const instrument = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: 'Northwestern MMM & MPD² Starter',
-  description: 'Northwestern MMM & MPD2 Next.js starter template',
+  title: 'PaleoDesk — Paleontology Research Desk',
+  description:
+    'A RAG-grounded paleontology research agent with citation and safety guardrails.',
 };
 
 export default function RootLayout({

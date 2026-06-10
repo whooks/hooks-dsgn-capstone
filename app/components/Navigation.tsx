@@ -8,12 +8,7 @@ import { ThemeToggle } from './ThemeToggle';
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/tasks', label: 'Tasks' },
-  { href: '/charts', label: 'Charts' },
   { href: '/chat', label: 'Chat' },
-  { href: '/test-dashboard', label: 'Tests' },
-  { href: '/design', label: 'Design' },
-  { href: '/memory', label: 'Memory' },
 ];
 
 function LogoMark() {
@@ -51,7 +46,7 @@ export default function Navigation() {
           className="flex items-center gap-3 font-display text-lg font-extrabold tracking-tight transition-opacity hover:opacity-80"
         >
           <LogoMark />
-          MMM · MPD² Studio
+          PaleoDesk
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

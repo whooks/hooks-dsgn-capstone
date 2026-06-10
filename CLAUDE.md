@@ -54,20 +54,14 @@ denies `rm -rf /`, force-push, hard reset, `npm publish`, and pipe-to-shell.
 app/
 ├── api/
 │   ├── chat/
-│   │   └── route.ts  # Proxy the request to the n8n workflow and stream its reply back.
+│   │   └── route.ts  # Proxy the request to the n8n workflow and return its reply.
 │   ├── client-errors/
 │   │   └── route.ts  # Receives client-side crash reports and records them server-side via the
-│   ├── memory/
-│   │   ├── search/
-│   │   │   └── route.ts  # POST /api/memory/search — run an auto graph search over the signed-in user's
-│   │   └── summary/
-│   │       └── route.ts  # GET /api/memory/summary — return the signed-in user's long-term memory (their
-│   ├── tasks/
-│   │   ├── [id]/
-│   │   │   └── route.ts
-│   │   └── route.ts
-│   └── test-runner/
-│       └── route.ts
+│   └── memory/
+│       ├── search/
+│       │   └── route.ts  # POST /api/memory/search — run an auto graph search over the signed-in user's
+│       └── summary/
+│           └── route.ts  # GET /api/memory/summary — return the signed-in user's long-term memory (their
 ├── auth/
 │   ├── callback/
 │   │   └── route.ts  # OAuth / PKCE callback. The provider redirects here with a `?code=...` which
@@ -75,8 +69,6 @@ app/
 │   │   └── route.ts  # Email confirmation / magic-link handler. Supabase emails a link containing a
 │   └── signout/
 │       └── route.ts  # Signs the user out and sends them to /login. Called by the Sign Out form in
-├── charts/
-│   └── page.tsx
 ├── chat/
 │   └── page.tsx
 ├── components/
@@ -88,49 +80,17 @@ app/
 │   │   ├── AiInstructionsCard.tsx
 │   │   ├── TddFrameworkCard.tsx
 │   │   └── WelcomeCard.tsx
-│   ├── tasks/
-│   │   ├── StudentsInfoCard.tsx
-│   │   └── TaskItem.tsx
 │   ├── ExampleComponent.tsx
 │   ├── Navigation.tsx
 │   ├── OAuthButtons.tsx  # Social sign-in buttons. OAuth must be initiated from the browser because it
 │   ├── PageHero.tsx  # The shared page header used at the top of every top-level page (Design, Charts,
 │   ├── PageShell.tsx  # The standard page frame for every top-level content page (Design, Charts, Chat,
 │   └── ThemeToggle.tsx
-├── design/
-│   ├── components/
-│   │   ├── AddComponentGuide.tsx  # A taste of the wider shadcn registry — components that aren't installed yet
-│   │   ├── ColorTokens.tsx  # The living color palette. Each swatch renders with its real token class
-│   │   ├── ComponentGallery.tsx  # Live gallery of the shadcn/ui primitives that ship with this template. These
-│   │   ├── ConceptsSection.tsx  # Plain-language explanation of what a design system is, what shadcn/ui is, and
-│   │   ├── DesignMdSection.tsx  # Explains the open DESIGN.md format that this template's design system is
-│   │   ├── EnforcementSection.tsx  # Explains, for non-technical students, why hard-coded styles create
-│   │   ├── TypeAndShapeSection.tsx  # Typography scale and shape (corner radius) reference. Shows the three real
-│   │   └── WhyDesignSystemsSection.tsx  # Frames the *problem* before any solution: what an interface looks like with no
-│   └── page.tsx
 ├── login/
 │   ├── actions.ts  # Email/password sign-in. Called as a form action from /login.
 │   └── page.tsx
-├── memory/
-│   ├── components/
-│   │   ├── GraphSearchExplorer.tsx  # Interactive: runs an auto graph search over the student's own Zep graph via
-│   │   ├── HowWeUseZepSection.tsx  # Grounds the concepts in *this* app: how the chat page uses Zep to remember
-│   │   ├── KnowledgeGraphSection.tsx  # Explains a knowledge graph in plain language: instead of storing chat logs as
-│   │   ├── sample-queries.ts  # Starter queries for the graph search explorer. They're phrased the way a
-│   │   ├── UserSummaryCard.tsx  # Interactive: fetches the signed-in student's long-term memory (their Zep
-│   │   └── WhatIsMemorySection.tsx  # Frames the problem first: a plain chatbot forgets everything the moment a
-│   └── page.tsx
 ├── signup/
 │   └── page.tsx
-├── tasks/
-│   └── page.tsx
-├── test-dashboard/
-│   ├── components/
-│   │   ├── CoverageCard.tsx
-│   │   ├── TestSuiteList.tsx
-│   │   └── TestSummaryCard.tsx
-│   ├── page.tsx
-│   └── types.ts
 ├── error.tsx  # Route-level error boundary. Next.js renders this when a Server/Client
 ├── global-error.tsx  # Global error boundary. Catches errors thrown in the root layout itself, where
 ├── globals.css
@@ -182,17 +142,13 @@ types/
 | `app/global-error.tsx` | Global error boundary. Catches errors thrown in the root layout itself, where | `GlobalError` |
 | `app/layout.tsx` | Applies the saved theme before paint (see public/theme-init.js) to | `metadata`, `RootLayout` |
 | `app/page.tsx` |  | `HomePage` |
-| `app/api/chat/route.ts` | Proxy the request to the n8n workflow and stream its reply back. | `maxDuration`, `POST` |
+| `app/api/chat/route.ts` | Proxy the request to the n8n workflow and return its reply. | `maxDuration`, `POST` |
 | `app/api/client-errors/route.ts` | Receives client-side crash reports and records them server-side via the | `POST` |
 | `app/api/memory/search/route.ts` | POST /api/memory/search — run an auto graph search over the signed-in user's | `POST` |
 | `app/api/memory/summary/route.ts` | GET /api/memory/summary — return the signed-in user's long-term memory (their | `GET` |
-| `app/api/tasks/route.ts` |  | `GET`, `POST` |
-| `app/api/tasks/[id]/route.ts` |  | `PATCH`, `DELETE` |
-| `app/api/test-runner/route.ts` |  | `POST` |
 | `app/auth/callback/route.ts` | OAuth / PKCE callback. The provider redirects here with a `?code=...` which | `GET` |
 | `app/auth/confirm/route.ts` | Email confirmation / magic-link handler. Supabase emails a link containing a | `GET` |
 | `app/auth/signout/route.ts` | Signs the user out and sends them to /login. Called by the Sign Out form in | `POST` |
-| `app/charts/page.tsx` |  | `ChartsPage` |
 | `app/chat/page.tsx` |  | `ChatPage` |
 | `app/components/ExampleComponent.tsx` |  | `ExampleComponent` |
 | `app/components/Navigation.tsx` |  | `Navigation` |
@@ -206,33 +162,9 @@ types/
 | `app/components/home/AiInstructionsCard.tsx` |  | `AiInstructionsCard` |
 | `app/components/home/TddFrameworkCard.tsx` |  | `TddFrameworkCard` |
 | `app/components/home/WelcomeCard.tsx` |  | `WelcomeCard` |
-| `app/components/tasks/StudentsInfoCard.tsx` |  | `StudentsInfoCard` |
-| `app/components/tasks/TaskItem.tsx` |  | `TaskItem` |
-| `app/design/page.tsx` |  | `metadata`, `DesignPage` |
-| `app/design/components/AddComponentGuide.tsx` | A taste of the wider shadcn registry — components that aren't installed yet | `AddComponentGuide` |
-| `app/design/components/ColorTokens.tsx` | The living color palette. Each swatch renders with its real token class | `ColorTokens` |
-| `app/design/components/ComponentGallery.tsx` | Live gallery of the shadcn/ui primitives that ship with this template. These | `ComponentGallery` |
-| `app/design/components/ConceptsSection.tsx` | Plain-language explanation of what a design system is, what shadcn/ui is, and | `ConceptsSection` |
-| `app/design/components/DesignMdSection.tsx` | Explains the open DESIGN.md format that this template's design system is | `DesignMdSection` |
-| `app/design/components/EnforcementSection.tsx` | Explains, for non-technical students, why hard-coded styles create | `EnforcementSection` |
-| `app/design/components/TypeAndShapeSection.tsx` | Typography scale and shape (corner radius) reference. Shows the three real | `TypeAndShapeSection` |
-| `app/design/components/WhyDesignSystemsSection.tsx` | Frames the *problem* before any solution: what an interface looks like with no | `WhyDesignSystemsSection` |
 | `app/login/actions.ts` | Email/password sign-in. Called as a form action from /login. | `login`, `signup` |
 | `app/login/page.tsx` |  | `LoginPage`, `default` |
-| `app/memory/page.tsx` |  | `metadata`, `MemoryPage` |
-| `app/memory/components/GraphSearchExplorer.tsx` | Interactive: runs an auto graph search over the student's own Zep graph via | `GraphSearchExplorer` |
-| `app/memory/components/HowWeUseZepSection.tsx` | Grounds the concepts in *this* app: how the chat page uses Zep to remember | `HowWeUseZepSection` |
-| `app/memory/components/KnowledgeGraphSection.tsx` | Explains a knowledge graph in plain language: instead of storing chat logs as | `KnowledgeGraphSection` |
-| `app/memory/components/sample-queries.ts` | Starter queries for the graph search explorer. They're phrased the way a | `SAMPLE_QUERIES` |
-| `app/memory/components/UserSummaryCard.tsx` | Interactive: fetches the signed-in student's long-term memory (their Zep | `UserSummaryCard` |
-| `app/memory/components/WhatIsMemorySection.tsx` | Frames the problem first: a plain chatbot forgets everything the moment a | `WhatIsMemorySection` |
 | `app/signup/page.tsx` |  | `SignupPage`, `default` |
-| `app/tasks/page.tsx` |  | `TasksPage` |
-| `app/test-dashboard/page.tsx` |  | `TestDashboard` |
-| `app/test-dashboard/types.ts` |  | `TestResult`, `TestSuite`, `Coverage`, `TestSummary`, `TestRunResult` |
-| `app/test-dashboard/components/CoverageCard.tsx` |  | `CoverageCard` |
-| `app/test-dashboard/components/TestSuiteList.tsx` |  | `TestSuiteList` |
-| `app/test-dashboard/components/TestSummaryCard.tsx` |  | `TestSummaryCard` |
 | `components/ui/badge.tsx` |  | `BadgeProps`, `Badge`, `badgeVariants` |
 | `components/ui/button.tsx` |  | `ButtonProps`, `Button`, `buttonVariants` |
 | `components/ui/card.tsx` |  | `Card`, `CardHeader`, `CardFooter`, `CardTitle`, `CardDescription` |
